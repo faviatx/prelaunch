@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Favia Therapeutics — Precision neuropsychiatric therapy targeting ASIC1a for panic disorder.">
+<title>Favia Therapeutics</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --base: #1E1C28;
+    --violet: #7B5CF0;
+    --violet-dim: rgba(123,92,240,0.18);
+    --gold: #F0A500;
+    --sienna: #D45C00;
+    --text-primary: #F3F0EB;
+    --text-muted: rgba(243,240,235,0.55);
+    --border: rgba(123,92,240,0.25);
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--base);
+    color: var(--text-primary);
+    font-family: Arial, "Helvetica Neue", sans-serif;
+    overflow-x: hidden;
+  }
+
+  canvas#neural {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    opacity: 0.85;
+  }
+
+  .page {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem 2rem;
+    text-align: center;
+  }
+
+  /* ── Logo mark ── */
+  .logo-wrap {
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fadeUp 1s 0.3s ease forwards;
+  }
+
+  .logo-lockup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .logo-icon {
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
+    mix-blend-mode: screen;
+    filter: drop-shadow(0 0 22px rgba(123,92,240,0.5));
+    flex-shrink: 0;
+  }
+
+  .logo-text {
+    height: 52px;
+    object-fit: contain;
+    mix-blend-mode: screen;
+  }
+
+  @media (max-width: 480px) {
+    .logo-icon { width: 68px; height: 68px; }
+    .logo-text { height: 38px; }
+  }
+
+  /* ── Headline ── */
+  .headline {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fadeUp 1s 0.6s ease forwards;
+    max-width: 640px;
+  }
+
+  h1 {
+    font-size: clamp(1.9rem, 5vw, 3rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    margin-bottom: 1.1rem;
+  }
+
+  h1 span.accent {
+    color: var(--violet);
+  }
+
+  .sub {
+    font-size: clamp(0.9rem, 2.2vw, 1.05rem);
+    line-height: 1.7;
+    color: var(--text-muted);
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* ── Stat chips ── */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    justify-content: center;
+    margin-top: 2rem;
+    opacity: 0;
+    animation: fadeUp 1s 0.9s ease forwards;
+  }
+
+  .chip {
+    border: 1px solid var(--border);
+    background: rgba(123,92,240,0.07);
+    border-radius: 999px;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .chip strong {
+    color: var(--violet);
+    font-weight: 600;
+  }
+
+  /* ── CTA ── */
+  .cta-wrap {
+    margin-top: 2.2rem;
+    opacity: 0;
+    animation: fadeUp 1s 1.1s ease forwards;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.7rem;
+  }
+
+  .cta-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .email-row {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    background: rgba(30,28,40,0.7);
+    backdrop-filter: blur(8px);
+  }
+
+  .email-row input[type="email"] {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+    width: min(280px, 60vw);
+    caret-color: var(--violet);
+  }
+
+  .email-row input::placeholder { color: var(--text-muted); }
+
+  .email-row button {
+    background: var(--violet);
+    border: none;
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.6rem 1.1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+
+  .email-row button:hover { background: #9070f7; }
+
+  /* ── Divider line ── */
+  .divider {
+    width: 48px;
+    height: 1px;
+    background: var(--border);
+    margin: 2.5rem auto 0;
+    opacity: 0;
+    animation: fadeUp 1s 1.2s ease forwards;
+  }
+
+  /* ── Footer ── */
+  footer {
+    margin-top: 2rem;
+    opacity: 0;
+    animation: fadeUp 1s 1.3s ease forwards;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(243,240,235,0.28);
+  }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .logo-wrap, .headline, .chips, .cta-wrap, .divider, footer {
+      opacity: 1; transform: none; animation: none;
+    }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="neural" aria-hidden="true"></canvas>
+
+<main class="page" role="main">
+
+  <!-- Logo -->
+  <div class="logo-wrap">
+    <div class="logo-lockup">
+      <img src="favia-icon.png" alt="Favia mark" class="logo-icon"/>
+      <img src="favia-wordmark-white-long.png" alt="Favia Therapeutics" class="logo-text"/>
+    </div>
+  </div>
+
+  <!-- Headline -->
+  <div class="headline">
+    <h1><span class="accent">Precision therapeutics</span><br>for neuropsychiatric conditions</h1>
+    <p class="sub">Currently in stealth. Selective conversations ongoing.</p>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-wrap">
+    <div class="cta-label">Get in touch</div>
+    <div class="email-row" role="form" aria-label="Email signup">
+      <input type="email" placeholder="your@email.com" aria-label="Email address" id="emailInput"/>
+      <button type="button" onclick="handleSubmit()">Connect</button>
+    </div>
+    <div id="msg" style="font-size:0.75rem;color:var(--violet);min-height:1.1em;"></div>
+  </div>
+
+  <div class="divider" role="separator"></div>
+
+  <footer>
+    &copy; 2026 Favia Therapeutics, Inc. &nbsp;·&nbsp; Salt Lake City, UT
+  </footer>
+
+</main>
+
+<script>
+/* ── Neural canvas ── */
+(function(){
+  const canvas = document.getElementById('neural');
+  const ctx = canvas.getContext('2d');
+  let W, H, nodes, tick = 0;
+
+  const VIOLET = '123,92,240';
+  const GOLD   = '240,165,0';
+  const NODE_COUNT = 52;
+  const CONN_DIST  = 90;
+
+  /* flash connections: ephemeral lines that appear, travel, then fade */
+  let flashes = [];
+
+  function spawnFlash(){
+    const a = nodes[Math.floor(Math.random()*nodes.length)];
+    const b = nodes[Math.floor(Math.random()*nodes.length)];
+    if(a === b) return;
+    const dx = a.x-b.x, dy = a.y-b.y;
+    if(Math.sqrt(dx*dx+dy*dy) > 140) return; /* only nearby pairs */
+    flashes.push({ ax: a.x, ay: a.y, bx: b.x, by: b.y,
+                   life: 1.0,                   /* 1→0 */
+                   speed: rand(0.008, 0.022),    /* fade rate */
+                   progress: 0,                 /* line draw-on 0→1 */
+                   drawSpeed: rand(0.03, 0.07),  /* how fast it draws in */
+                   gold: Math.random() < 0.18 });
+  }
+
+  function resize(){
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    init();
+  }
+
+  function rand(a, b){ return a + Math.random()*(b-a); }
+
+  function init(){
+    nodes = Array.from({length: NODE_COUNT}, () => ({
+      x: rand(0, W), y: rand(0, H),
+      vx: rand(-0.22, 0.22),
+      vy: rand(-0.22, 0.22),
+      r: rand(1.4, 3.2),
+      pulse: rand(0, Math.PI*2),
+      gold: Math.random() < 0.12
+    }));
+    flashes = [];
+  }
+
+  function draw(){
+    tick++;
+    ctx.clearRect(0, 0, W, H);
+
+    /* spawn ~1 flash every 40 frames */
+    if(tick % 40 === 0) spawnFlash();
+
+    /* persistent connections */
+    for(let i=0; i<nodes.length; i++){
+      const a = nodes[i];
+      for(let j=i+1; j<nodes.length; j++){
+        const b = nodes[j];
+        const dx = a.x-b.x, dy = a.y-b.y;
+        const d = Math.sqrt(dx*dx+dy*dy);
+        if(d < CONN_DIST){
+          const alpha = (1 - d/CONN_DIST) * 0.55;
+          const pulse = 0.5 + 0.5*Math.sin(tick*0.018 + a.pulse);
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.strokeStyle = `rgba(${VIOLET},${(alpha * pulse).toFixed(3)})`;
+          ctx.lineWidth = 1.0;
+          ctx.stroke();
+        }
+      }
+    }
+
+    /* flash connections — draw-on then fade */
+    flashes = flashes.filter(f => f.life > 0);
+    for(const f of flashes){
+      f.progress = Math.min(1, f.progress + f.drawSpeed);
+      const ex = f.ax + (f.bx - f.ax) * f.progress;
+      const ey = f.ay + (f.by - f.ay) * f.progress;
+      const alpha = f.life * 0.7;
+      const color = f.gold ? GOLD : VIOLET;
+      ctx.beginPath();
+      ctx.moveTo(f.ax, f.ay);
+      ctx.lineTo(ex, ey);
+      ctx.strokeStyle = `rgba(${color},${alpha.toFixed(3)})`;
+      ctx.lineWidth = f.gold ? 0.9 : 0.7;
+      ctx.stroke();
+      if(f.progress >= 1) f.life -= f.speed;
+    }
+
+    /* nodes */
+    for(const n of nodes){
+      /* drift first so position is consistent with connection endpoints */
+      n.x += n.vx; n.y += n.vy;
+      if(n.x < -20) n.x = W+20;
+      if(n.x > W+20) n.x = -20;
+      if(n.y < -20) n.y = H+20;
+      if(n.y > H+20) n.y = -20;
+
+      const pulse = 0.6 + 0.4*Math.sin(tick*0.025 + n.pulse);
+      const color = n.gold ? GOLD : VIOLET;
+      const grd = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r*3.5);
+      grd.addColorStop(0, `rgba(${color},${(0.9*pulse).toFixed(2)})`);
+      grd.addColorStop(1, `rgba(${color},0)`);
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r*3.5, 0, Math.PI*2);
+      ctx.fillStyle = grd;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r*pulse, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(${color},0.9)`;
+      ctx.fill();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  /* respect reduced-motion */
+  const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+  if(!mq.matches){
+    window.addEventListener('resize', resize);
+    resize();
+    draw();
+  } else {
+    canvas.style.display = 'none';
+  }
+})();
+
+/* ── Email submit ── */
+function handleSubmit(){
+  const el = document.getElementById('emailInput');
+  const msg = document.getElementById('msg');
+  const v = el.value.trim();
+  if(!v || !v.includes('@')){
+    msg.textContent = 'Please enter a valid email.';
+    msg.style.color = '#D45C00';
+    return;
+  }
+  msg.textContent = 'Thank you — we\'ll be in touch.';
+  msg.style.color = 'var(--violet)';
+  el.value = '';
+  /* TODO: wire to Formspree, Mailchimp, etc. */
+}
+</script>
+</body>
+</html>
